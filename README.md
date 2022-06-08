@@ -17,7 +17,7 @@ On each project I worked with a number of fellow students from the same DataScie
 |       | ....and others  |
 |proj3  |[@ATC-mmueller](https://github.com/ATC-mmueller)|
 |       |[WeiLing Peng](https://github.com/Weilingp) |
-|       |[Tamuka](https://github.com/[github handle])|
+|       |[Tamuka](https://github.com/TamuNongera02)|
 
 ### Methods Used
 [//]: # (Inferential Statistics)
