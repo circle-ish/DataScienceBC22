@@ -12,7 +12,7 @@ On each project I worked with a number of fellow students from the same DataScie
 |Project  |Name     |
 |---------|---------|
 |proj2  |[Balu Govind](https://github.com/BaluGovind) |
-|       |[Felix](https://github.com/F-L-X-K)|
+|       |[F-L-X-K](https://github.com/F-L-X-K)|
 |       |[Stephanie Fosso](https://github.com/FossoStephanie) |
 |       | ....and others  |
 |proj3  |[@ATC-mmueller](https://github.com/ATC-mmueller)|
