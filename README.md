@@ -46,6 +46,7 @@ On each project I worked with a number of fellow students from the same DataScie
 ## Featured Data and Deliverables
 * proj2: Google Slides ["An investigation into Eniac’s discount strategy"](https://docs.google.com/presentation/d/1h76Fz6eDDT8DPktf8YEF953KTxp-ny33GF0PS2D31e4/edit#slide=id.p)
 * proj2: the data used for Eniac comes from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+* proj3: requires API keys from from [openweather](https://openweathermap.org/) and [rapidAPI/aerodatabox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox)
 
 ## Contributing WBS CS Members
 
