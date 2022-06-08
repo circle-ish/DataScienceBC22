@@ -17,7 +17,7 @@ On each project I worked with a number of fellow students from the same DataScie
 |       | ....and others  |
 |proj3  |[@ATC-mmueller](https://github.com/ATC-mmueller)|
 |       |[WeiLing Peng](https://github.com/Weilingp) |
-|       |[Tamuka](https://github.com/[github handle])|
+|       |[Tamuka](https://github.com/TamuNongera02)|
 
 ### Methods Used
 [//]: # (Inferential Statistics)
@@ -43,8 +43,10 @@ On each project I worked with a number of fellow students from the same DataScie
 1. Clone this repo (for help see this [tutorial](https://help.github.com/articles/cloning-a-repository/)).
 2. Each project contains a main.ipynb that guides through the process.
 
-## Featured Notebooks/Analysis/Deliverables
-* proj2: Google Slides[An investigation into Eniac’s discount strategy](https://docs.google.com/presentation/d/1h76Fz6eDDT8DPktf8YEF953KTxp-ny33GF0PS2D31e4/edit#slide=id.p)
+## Featured Data and Deliverables
+* proj2: Google Slides ["An investigation into Eniac’s discount strategy"](https://docs.google.com/presentation/d/1h76Fz6eDDT8DPktf8YEF953KTxp-ny33GF0PS2D31e4/edit#slide=id.p)
+* proj2: the data used for Eniac comes from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+* proj3: requires API keys from from [openweather](https://openweathermap.org/) and [rapidAPI/aerodatabox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox)
 
 ## Contributing WBS CS Members
 
