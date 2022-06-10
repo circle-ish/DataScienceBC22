@@ -1,4 +1,5 @@
 from pandas import DataFrame
+import pandas as pd 
 
 ### CITY 
 def scrape_wiki_cities() -> DataFrame:
@@ -16,14 +17,42 @@ def scrape_wiki_cities() -> DataFrame:
     # prettify the names and take only selected ones
     header = [h.text.strip().replace(' ', '_').lower() for h in table[0].select('th')][1:-2]
     cities = [[cell.text.strip() for cell in city.select('td')[1:-2]] for city in table[1:]]
+    
+    city_url = 'https://en.wikipedia.org'
+    links = [city_url + city.select('td:nth-child(2) a:first-of-type')[0]['href'] for city in table[1:]]
 
-    import pandas as pd 
-    return cleanup_cities(pd.DataFrame(data=cities, columns=header))
+    return cleanup_cities(add_lat_lon(pd.DataFrame(data=cities, columns=header), links))
+
+def add_lat_lon(df : DataFrame, links : list) -> DataFrame:
+    from bs4 import BeautifulSoup
+    import requests
+    
+    latitude = []
+    longitude = []
+    for city_url in links:
+        city_response = requests.get(city_url)
+        soup = BeautifulSoup(city_response.content, "html.parser")
+        latitude.append(soup.select(".latitude")[0].get_text())
+        longitude.append(soup.select(".longitude")[0].get_text())
+    return df.assign(lat = latitude, lon = longitude)
 
 def cleanup_cities(df : DataFrame):
-    import pandas as pd
     df.loc[:, 'officialpopulation'] = df['officialpopulation'].str.replace(',', '').astype(int)
     df.loc[:, 'date'] = pd.to_datetime(df['date'])
+
+    # since all latitudes gathered are on the north half and not too close to the equator,
+    # we can just remove all non-digits and put a floating point after the second digit.
+    # If we would look at cities all over the world, we should proceed as we do for the longitude
+    df.loc[:,'lat'] = df.lat.str.replace('\D','', regex=True)
+    df.loc[:,'lat'] = df.lat.str[:2] + '.' + df.lat.str[2:]
+
+    df.loc[:,'lon'] = df.lon.str.replace('.','')
+    df.loc[:,'lon'] = df.lon.str.replace('°','.')
+    mask = df.lon.str[-1] == 'W','lon'
+    df.loc[mask] = '-' + df.loc[mask]
+    df.loc[:,'lon'] = df.lon.replace('[EW]|″|′', '', regex=True)
+    df.loc[:,'lat'] = pd.to_numeric(df['lat'])
+    df.loc[:,'lon'] = pd.to_numeric(df['lon'])
     return df
     
     
@@ -123,6 +152,9 @@ def icao_airport_codes(
     longitudes : list, 
     aerodatabox_key : str,
     args : list = get_icao_args()) -> DataFrame:
+    
+    from bs4 import BeautifulSoup
+    import requests
     
     assert len(latitudes) == len(longitudes)
     querystring, headers = args

@@ -12,6 +12,19 @@ def install_pip_pkg(required : set):
         subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
         print(f'Installation successful')
 
+def load_or_execute_df(relative_path, func, args = None):
+    import os
+    import pandas as pd
+    df = None
+    if os.path.isfile(relative_path):
+        df = pd.read_csv(relative_path, index_col=0)
+    else:
+        if args:
+            df = func(**args)
+        else:
+            df = func()
+        df.to_csv(relative_path)
+    return df
         
 class PrivateKeysHandler:
     def __init__(self, relative_path_to_file : str):
@@ -28,7 +41,7 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(''), '../..'))
 from proj3_gans_scooters.src.utils import install_pip_pkg
     
-class yMySQLConnection:
+class MyMySQLConnection:
     from pandas import DataFrame
     from sqlalchemy.engine.base import Connection
     def __init__(
