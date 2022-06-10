@@ -18,12 +18,13 @@ def scrape_wiki_cities() -> DataFrame:
     cities = [[cell.text.strip() for cell in city.select('td')[1:-2]] for city in table[1:]]
 
     import pandas as pd 
-    return pd.DataFrame(data=cities, columns=header)
+    return cleanup_cities(pd.DataFrame(data=cities, columns=header))
 
 def cleanup_cities(df : DataFrame):
     import pandas as pd
     df.loc[:, 'officialpopulation'] = df['officialpopulation'].str.replace(',', '').astype(int)
     df.loc[:, 'date'] = pd.to_datetime(df['date'])
+    return df
     
     
 ### WEATHER 
@@ -41,13 +42,13 @@ def scrape_weather(city_lst : list, openweather_key : str) -> DataFrame:
         weather_json = get_weather(weather_arguments)
 
         keep_cols = ['city', 'dt_txt', 'main:temp', 'main:feels_like', 'main:humidity', 
-                     'weather:0:description', 'clouds:all', 'wind:speed', 'wind:deg', 
+                     'weather:0:description', 'visibility', 'wind:speed', 'wind:deg', 
                      'wind:gust', 'pop', 'rain:3h', 'snow:3h', 'sys:pod']
         weather_df = weather_json_to_df(weather_json, c, keep_cols)
 
 
         new_cols = ['city', 'date', 'temp_celcius', 'temp_feels_like_celcius', 'humidity_percent', 
-                     'weather_description', 'clouds_percent', 'wind_speed_meter_sec', 'wind_direction_degree', 
+                     'weather_description', 'visibility', 'wind_speed_meter_sec', 'wind_direction_degree', 
                      'wind_gust_meter_sec', 'pop_percent', 'rain_3h_mm', 'snow_3h_mm', 'pod']
         weather_df = weather_df.rename(columns=dict(zip(keep_cols, new_cols)))
         cleanup_weather(weather_df)
@@ -56,7 +57,7 @@ def scrape_weather(city_lst : list, openweather_key : str) -> DataFrame:
     if weather_lst:
         import pandas as pd
         df = pd.concat(weather_lst, ignore_index=True)
-    return df
+    return cleanup_weather(df)
 
 def get_weather(weather_arguments : dict) -> dict:
     import requests
@@ -78,7 +79,8 @@ def get_weather(weather_arguments : dict) -> dict:
 def weather_json_to_df(weather_json : dict, city : str, keep_cols : list=None) -> DataFrame:
     # install flatdict; needed for weather_json_to_df()
     import sys, os
-    from proj3_utils import install_pip_pkg
+    sys.path.append(os.path.join(os.path.dirname(''), '../..'))
+    from proj3_gans_scooters.src.utils import install_pip_pkg
 
     #!pip3 install flatdict
     install_pip_pkg({'flatdict'})
@@ -103,6 +105,7 @@ def cleanup_weather(df : DataFrame):
     if 'snow_3h_mm' in df:
         df.loc[:, 'snow_3h_mm'] = df['snow_3h_mm'].fillna(0)
     df.loc[:, 'date'] = pd.to_datetime(df['date'])
+    return df
     
 
 ### AIRPORTS

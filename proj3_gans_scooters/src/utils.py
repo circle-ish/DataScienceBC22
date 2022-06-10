@@ -31,36 +31,73 @@ class MyMySQLConnection:
             db_name : str = 'gans_scooters',
             host : str = "127.0.0.1",
             port : int = 3306):
-        
-        install_pip_pkg({'mysql-connector-python'})
-        import mysql.connector
-        
-        self.db_name = db_name
+                
         user = credentials['user']
         password = credentials['password']
         
-        #create database 
-        self.connecter_cnx  = mysql.connector.connect(
-          host="localhost",
-          user=user,
-          password=password
-        )
+        # setup SQLAlchemy   
+        from sqlalchemy import create_engine 
+        install_pip_pkg({'pymysql'})
+        
+        dialect = 'mysql'
+        driver = 'pymysql'
+        cnx = f'{dialect}+{driver}://{user}:{password}@{host}:{port}/' #{db_name}'
+        self.alch_engine = create_engine(
+            cnx, 
+            connect_args={'connect_timeout': 10}, 
+            echo=False
+        ) 
+        
+        # test if database is already created
+        with self.alch_engine.begin() as con:
+            cursor = con.execute("SHOW DATABASES")
+            if (db_name,) not in list(cursor):
+                con.execute(f"CREATE DATABASE {db_name}")
+                
+    def add_tables_to_db(
+            self, 
+            dfs : list, 
+            tablenames : list, 
+            insert_modes : list,
+            id_columns : list = None
+            ):
+        
+        assert(len(dfs) == len(tablenames))
+        assert(len(dfs) == len(id_columns))
+        assert(len(dfs) == len(insert_modes))
+        
+        if not id_columns: # only goes in if None
+            id_columns = [None] * len(dfs)
+        
+        # 'begin' opens a transaction and the 'with' environment cares for a rollback if something 
+        # goes wrong
+        with self.alch_engine.begin() as con:
+            for i, df in enumerate(dfs):
+                df.to_sql(
+                    name= tablenames[i],
+                    if_exists=insert_modes[i], #'append', #'replace'
+                    con=con, 
+                    index=False,
+                    chunksize=1000
+                )
 
-        cursor = self.connecter_cnx .cursor()
-        cursor.execute("SHOW DATABASES")
-        if (self.db_name,) not in list(cursor):
-            cursor.execute(f"CREATE DATABASE {self.db_name}")
-        cursor.close()
+                if id_columns[i]: #only enter if not None
+                    con.execute(f'ALTER TABLE `{tablenames[i]}` ADD PRIMARY KEY (`{id_columns[i]}`);')
+          
     
-        # setup SQLAlchemy      
-        self.alch_cnx = f'mysql+pymysql://{user}:{password}@{host}:{port}/{self.db_name}'
-        
-    def __del__(self):
-        self.connecter_cnx.close()
-        
     from pandas import DataFrame
-    def add_table_to_db(self, df : DataFrame):
-        df.to_sql(self.db_name, 
-              if_exists='append', 
-              con=self.alch_cnx, 
-              index=False)
+    def add_table_to_db(self, df : DataFrame, tablename : str, id_column : str):
+        with self.alch_engine.begin() as con:
+            df.to_sql(
+                #schema="dbo"
+                name= tablename,
+                if_exists='append', #'replace'
+                con=con, 
+                index=False,
+                chunksize=1000
+            )
+    
+            con.execute(f'ALTER TABLE `{tablename}` ADD PRIMARY KEY (`{id_column}`);')
+              #not null, unique, default, primary key, foreign key
+            
+            
