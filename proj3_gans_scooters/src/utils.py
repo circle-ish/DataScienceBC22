@@ -5,11 +5,21 @@ def install_pip_pkg(required : set):
 
     installed = {pkg.key for pkg in pkg_resources.working_set}
     missing = required - installed
-
+    
     if missing:
         print(f'Trying to install {missing}')
         python = sys.executable
-        subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
+        output = None
+        try:
+            result = subprocess.check_call(
+                [python, '-m', 'pip', 'install', *missing], 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            print(result.returncode, result.stdout, result.stderr)
+            raise subprocess.CalledProcessError(e.output)
+    
+        
         print(f'Installation successful')
 
 def load_or_execute_df(relative_path, func, args = None):
@@ -121,15 +131,10 @@ class MyMySQLConnection:
             self, 
             dfs : list, 
             tablenames : list, 
-            insert_modes : list,
-            id_columns : list = None
+            insert_modes : list
             ):
-        
-        if not id_columns: # only goes in if None
-            id_columns = [None] * len(dfs)
-            
+                    
         assert(len(dfs) == len(tablenames))
-        assert(len(dfs) == len(id_columns))
         assert(len(dfs) == len(insert_modes))
         
         # 'begin' opens a transaction and the 'with' environment cares for a rollback if something 
@@ -177,7 +182,7 @@ class MyMySQLConnection:
             for i, foreigntable in enumerate(foreigntables):
                 tmp_df = pd.read_sql(f"SELECT {','.join(foreigncolumns[i])}, {','.join(matchcolumns[i])} FROM {foreigntable};", con)
                 for j in range(len(foreigncolumns[i])):
-                    df[foreigncolumns[i][j]] = df.merge(tmp_df, on=matchcolumns[i][j])[foreigncolumns[i][j]]
+                    df.loc[:,foreigncolumns[i][j]] = df.merge(tmp_df, on=matchcolumns[i][j])[foreigncolumns[i][j]]
                     if not keepmatchcolumns[i][j]:
                         df = df.drop(columns=matchcolumns[i][j])
             self.add_table_to_db(df, tablename, insert_mode)

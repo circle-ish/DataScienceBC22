@@ -148,6 +148,7 @@ def get_icao_args() -> list:
 
 from pandas import DataFrame
 def icao_airport_codes(
+    city_val : str,
     latitudes : list, 
     longitudes : list, 
     aerodatabox_key : str,
@@ -159,17 +160,31 @@ def icao_airport_codes(
     assert len(latitudes) == len(longitudes)
     querystring, headers = args
     headers['X-RapidAPI-Key'] = aerodatabox_key
-    list_for_df = []
-
+    
+    list_of_df = []
     for i in range(len(latitudes)):
         url = f"https://aerodatabox.p.rapidapi.com/airports/search/location/{latitudes[i]}/{longitudes[i]}/km/100/16"
         response = requests.request("GET", url, headers=headers, params=querystring)
 
         if response.status_code != 200:
             raise Exception(f'aerodatabox returned code {response.status_code} for url = {url}')
-        list_for_df.append(pd.json_normalize(response.json()['items']))
-        df = None
-        if list_for_df:
-            df = pd.concat(list_for_df, ignore_index=True)
+        list_of_df.append(pd.json_normalize(response.json()['items']).assign(city = city_val[i]))
+    
+    if not list_of_df: # empty list returns False
+        raise Exception(f'no airports returned from aerodatabox') 
 
-    return df
+    return pd.concat(list_of_df, ignore_index=True)
+
+def city_airport_distance(cities_df : DataFrame, airports_df : DataFrame) -> DataFrame:
+    import sys, os
+    sys.path.append(os.path.join(os.path.dirname(''), '..'))
+    from proj3_gans_scooters.src.utils import install_pip_pkg
+    install_pip_pkg({'geopy'})
+    from geopy import distance
+                    
+    keep_cols = ['city', 'icao', 'lat_airport', 'lon_airport', 'lat_city', 'lon_city']
+    airport_distance = airports_df.merge(cities_df, on = 'city', suffixes=('_airport', '_city'))[keep_cols]
+    airport_distance['distance_in_km'] = airport_distance.apply(
+        lambda x: distance.distance((x.lat_city, x.lon_city), (x.lat_airport, x.lon_airport)).km, axis=1)
+    airport_distance.loc[:,'distance_in_km'] = airport_distance['distance_in_km'].round(2)
+    return airport_distance[['city', 'icao', 'distance_in_km']]
