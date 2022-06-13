@@ -193,10 +193,21 @@ class MyMySQLConnection:
         # retrieve foreign key and send merged table to db
         with self.alch_engine.begin() as con:
             from pandas import read_sql as pd_read_sql
+            from pandas import set_option as pd_set_option
             for i, foreigntable in enumerate(foreigntables):
+                
+                #retrieve foreign key
                 tmp_df = pd_read_sql(f"SELECT {','.join(foreigncolumns[i])}, {','.join(matchcolumns[i])} FROM {foreigntable};", con)
                 for j in range(len(foreigncolumns[i])):
-                    df.loc[:,foreigncolumns[i][j]] = df.merge(tmp_df, on=matchcolumns[i][j])[foreigncolumns[i][j]]
+                    
+                    # suppress "A value is trying to be set on a copy of a slice from a DataFrame." warning
+                    pd_set_option('mode.chained_assignment', None)
+                    df.loc[:,foreigncolumns[i][j]] = df.merge(tmp_df, on=matchcolumns[i][j])[foreigncolumns[i][j]].copy()
+                    pd_set_option('mode.chained_assignment', 'warn')
+                    
+                    # delete column that was used to match if it is not supposed to be inserted into the table
                     if not keepmatchcolumns[i][j]:
                         df = df.drop(columns=matchcolumns[i][j])
+                        
+            # send data to sql
             self.add_table_to_db(df, tablename, insert_mode)
