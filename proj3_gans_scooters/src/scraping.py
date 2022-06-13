@@ -1,5 +1,9 @@
 from pandas import DataFrame
-import pandas as pd 
+import pandas as pd     
+import sys, os
+
+sys.path.append(os.path.join(os.path.dirname(''), '../..'))
+from proj3_gans_scooters.src.utils import install_pip_pkg
 
 ### CITY 
 def scrape_wiki_cities() -> DataFrame:
@@ -107,18 +111,13 @@ def get_weather(weather_arguments : dict) -> dict:
 
 def weather_json_to_df(weather_json : dict, city : str, keep_cols : list=None) -> DataFrame:
     # install flatdict; needed for weather_json_to_df()
-    import sys, os
-    sys.path.append(os.path.join(os.path.dirname(''), '../..'))
-    from proj3_gans_scooters.src.utils import install_pip_pkg
-
-    #!pip3 install flatdict
     install_pip_pkg({'flatdict'})
     
     from flatdict import FlatterDict as flatten
-    import pandas as pd
+    from pandas import json_normalize as pd_json_normalize
     
     #take weather data and city name
-    weather_df = pd.json_normalize([dict(flatten(i)) for i in weather_json['list']])
+    weather_df = pd_json_normalize([dict(flatten(i)) for i in weather_json['list']])
     weather_df = weather_df.assign(city = [city]*weather_df.shape[0])
     
     # return only selection of columns
@@ -146,7 +145,6 @@ def get_icao_args() -> list:
     }
     return [querystring, headers]
 
-from pandas import DataFrame
 def icao_airport_codes(
     city_val : str,
     latitudes : list, 
@@ -156,6 +154,8 @@ def icao_airport_codes(
     
     from bs4 import BeautifulSoup
     import requests
+    from pandas import json_normalize as pd_json_normalize
+    from pandas import concat as pd_concat
     
     assert len(latitudes) == len(longitudes)
     querystring, headers = args
@@ -168,23 +168,20 @@ def icao_airport_codes(
 
         if response.status_code != 200:
             raise Exception(f'aerodatabox returned code {response.status_code} for url = {url}')
-        list_of_df.append(pd.json_normalize(response.json()['items']).assign(city = city_val[i]))
+        list_of_df.append(pd_json_normalize(response.json()['items']).assign(city = city_val[i]))
     
     if not list_of_df: # empty list returns False
         raise Exception(f'no airports returned from aerodatabox') 
 
-    return pd.concat(list_of_df, ignore_index=True)
+    return pd_concat(list_of_df, ignore_index=True)
 
 def city_airport_distance(cities_df : DataFrame, airports_df : DataFrame) -> DataFrame:
-    import sys, os
-    sys.path.append(os.path.join(os.path.dirname(''), '..'))
-    from proj3_gans_scooters.src.utils import install_pip_pkg
     install_pip_pkg({'geopy'})
-    from geopy import distance
+    from geopy.distance import distance as geodistance
                     
     keep_cols = ['city', 'icao', 'lat_airport', 'lon_airport', 'lat_city', 'lon_city']
     airport_distance = airports_df.merge(cities_df, on = 'city', suffixes=('_airport', '_city'))[keep_cols]
     airport_distance['distance_in_km'] = airport_distance.apply(
-        lambda x: distance.distance((x.lat_city, x.lon_city), (x.lat_airport, x.lon_airport)).km, axis=1)
+        lambda x: geodistance((x.lat_city, x.lon_city), (x.lat_airport, x.lon_airport)).km, axis=1)
     airport_distance.loc[:,'distance_in_km'] = airport_distance['distance_in_km'].round(2)
     return airport_distance[['city', 'icao', 'distance_in_km']]

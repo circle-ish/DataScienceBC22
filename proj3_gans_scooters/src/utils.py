@@ -47,30 +47,27 @@ class PrivateKeysHandler:
     def load_keys(self, section : str) -> dict:
         return self.configParser[section]
     
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(''), '../..'))
-from proj3_gans_scooters.src.utils import install_pip_pkg
-    
 class MyMySQLConnection:
     from pandas import DataFrame
     from sqlalchemy.engine.base import Connection
     def __init__(
             self, 
             credentials : dict, 
-            db_name : str = 'gans_scooters',
-            host : str = "127.0.0.1",
-            port : int = 3306):
+            db_name : str = 'gans_scooters'
+            ):
                 
         user = credentials['user']
         password = credentials['password']
+        port = int(credentials['port'])
+        host = credentials['hostname']
+        dialect = credentials.get('dialect', 'mysql')
+        driver = credentials.get('driver', 'pymysql')
         self.db_name = db_name
         
         # setup SQLAlchemy   
         from sqlalchemy import create_engine 
-        install_pip_pkg({'pymysql'})
+        if driver == 'pymysql': install_pip_pkg({'pymysql'})
         
-        dialect = 'mysql'
-        driver = 'pymysql'
         cnx = f'{dialect}+{driver}://{user}:{password}@{host}:{port}/' #{db_name}'
         
         # create database if not already created
