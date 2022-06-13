@@ -24,10 +24,10 @@ def install_pip_pkg(required : set):
 
 def load_or_execute_df(relative_path, func, args = None):
     import os
-    import pandas as pd
+    from pandas import read_csv as pd_read_csv
     df = None
     if os.path.isfile(relative_path):
-        df = pd.read_csv(relative_path, index_col=0)
+        df = pd_read_csv(relative_path, index_col=0)
     else:
         if args:
             df = func(**args)
@@ -90,23 +90,33 @@ class MyMySQLConnection:
     #   ...}
     def create_tables(self, tables : dict):        
         with self.alch_engine.begin() as con:
+            #con.execute(f"USE {self.db_name}")
             for table, (columns, args) in tables.items():
-                con.exec_driver_sql(f"DROP TABLE IF EXISTS {table}")
+                
+                #drop old table without checking for foreign keys (would throw error)
+                con.execute('SET FOREIGN_KEY_CHECKS = 0')
+                con.execute(f"DROP TABLE IF EXISTS {table}")
+                con.execute('SET FOREIGN_KEY_CHECKS = 1')
+                
                 cols = ',\n'.join(map(lambda x: x[0] + ' ' + x[1], zip(columns, args)))
                 con.execute(f"CREATE TABLE {table} ({cols});")
                  
     def execute(self, query : str):
         with self.alch_engine.begin() as con:
+            con.execute(f'USE {self.db_name};')
             return con.execute(query)
+        
+        
+    def get_connection(self):
+        return self.alch_engine.connect()
                     
     def add_table_to_db(
             self, 
             df : DataFrame, 
             tablename : str, 
-            insert_mode : str,
-            con : Connection = None):
-        
-        with con if con else self.alch_engine.begin() as con:
+            insert_mode : str): 
+             
+        with self.alch_engine.begin() as con:
             # replace messes up the column types
             # instead emptying the table and then appending
             # keeps all the constraints
@@ -122,8 +132,8 @@ class MyMySQLConnection:
                 schema=self.db_name,
                 index=False,
                 chunksize=1000
-            )
-            
+            )           
+                
     def add_tables_to_db(
             self, 
             dfs : list, 
@@ -137,8 +147,13 @@ class MyMySQLConnection:
         # 'begin' opens a transaction and the 'with' environment cares for a rollback if something 
         # goes wrong
         with self.alch_engine.begin() as con:
+            remaining_calls = len(dfs)
             for i, df in enumerate(dfs):
-                self.add_table_to_db(df, tablenames[i], insert_modes[i], con)
+                self.add_table_to_db(
+                    df, 
+                    tablenames[i], 
+                    insert_modes[i]
+                )
 
     #extracts foreign keys into df before adding to db
     def add_to_db_with_foreign_key(
@@ -175,9 +190,11 @@ class MyMySQLConnection:
             for i in matchcolumns:
                 assert(len(keepmatchcolumns[i]) == len(matchcolumns[i]))
                 
+        # retrieve foreign key and send merged table to db
         with self.alch_engine.begin() as con:
+            from pandas import read_sql as pd_read_sql
             for i, foreigntable in enumerate(foreigntables):
-                tmp_df = pd.read_sql(f"SELECT {','.join(foreigncolumns[i])}, {','.join(matchcolumns[i])} FROM {foreigntable};", con)
+                tmp_df = pd_read_sql(f"SELECT {','.join(foreigncolumns[i])}, {','.join(matchcolumns[i])} FROM {foreigntable};", con)
                 for j in range(len(foreigncolumns[i])):
                     df.loc[:,foreigncolumns[i][j]] = df.merge(tmp_df, on=matchcolumns[i][j])[foreigncolumns[i][j]]
                     if not keepmatchcolumns[i][j]:
