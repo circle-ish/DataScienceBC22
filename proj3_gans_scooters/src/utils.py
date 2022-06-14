@@ -90,7 +90,6 @@ class MyMySQLConnection:
     #   ...}
     def create_tables(self, tables : dict):        
         with self.alch_engine.begin() as con:
-            #con.execute(f"USE {self.db_name}")
             for table, (columns, args) in tables.items():
                 
                 #drop old table without checking for foreign keys (would throw error)
@@ -194,6 +193,7 @@ class MyMySQLConnection:
         with self.alch_engine.begin() as con:
             from pandas import read_sql as pd_read_sql
             from pandas import set_option as pd_set_option
+            
             for i, foreigntable in enumerate(foreigntables):
                 
                 #retrieve foreign key
