@@ -21,7 +21,7 @@ def scrape_wiki_cities() -> DataFrame:
     table = soup.select('table.wikitable > tbody > tr')
 
     # prettify the names and take only selected ones
-    header = [h.text.strip().replace(' ', '_').lower() for h in table[0].select('th')][1:-2]
+    header = [h.text.strip().replace(' ', '_', regex=False).lower() for h in table[0].select('th')][1:-2]
     cities = [[cell.text.strip() for cell in city.select('td')[1:-2]] for city in table[1:]]
     
     city_url = 'https://en.wikipedia.org'
@@ -43,7 +43,7 @@ def add_lat_lon(df : DataFrame, links : list) -> DataFrame:
     return df.assign(lat = latitude, lon = longitude)
 
 def cleanup_cities(df : DataFrame):
-    df.loc[:, 'officialpopulation'] = df['officialpopulation'].str.replace(',', '').astype(int)
+    df.loc[:, 'officialpopulation'] = df['officialpopulation'].str.replace(',', '', regex=False).astype(int)
     df.loc[:, 'date'] = pd.to_datetime(df['date'])
 
     # since all latitudes gathered are on the north half and not too close to the equator,
@@ -52,8 +52,8 @@ def cleanup_cities(df : DataFrame):
     df.loc[:,'lat'] = df.lat.str.replace('\D','', regex=True)
     df.loc[:,'lat'] = df.lat.str[:2] + '.' + df.lat.str[2:]
 
-    df.loc[:,'lon'] = df.lon.str.replace('.','')
-    df.loc[:,'lon'] = df.lon.str.replace('°','.')
+    df.loc[:,'lon'] = df.lon.str.replace('.','', regex=False)
+    df.loc[:,'lon'] = df.lon.str.replace('°','.', regex=False)
     mask = df.lon.str[-1] == 'W','lon'
     df.loc[mask] = '-' + df.loc[mask]
     df.loc[:,'lon'] = df.lon.replace('[EW]|″|′', '', regex=True)
@@ -103,7 +103,7 @@ def get_weather(weather_arguments : dict) -> dict:
         
     #preparing the request url
     weather_api = "http://api.openweathermap.org/data/2.5/forecast?"
-    api_arguments = repr(weather_arguments).replace("': '", '=').replace("', '", '&')[2:-2]
+    api_arguments = repr(weather_arguments).replace("': '", '=', regex=False).replace("', '", '&', regex=False)[2:-2]
     weather_request = weather_api + api_arguments
     
     response = requests.get(weather_request)
@@ -175,7 +175,11 @@ def icao_airport_codes(
     if not list_of_df: # empty list returns False
         raise Exception(f'no airports returned from aerodatabox') 
 
-    return pd_concat(list_of_df, ignore_index=True)
+    airports_df = pd_concat(list_of_df, ignore_index=True)
+    keep_cols = ['city', 'icao', 'name', 'location.lat', 'location.lon']
+    new_cols = ['city', 'icao', 'name', 'lat', 'lon']
+    return airports_df[keep_cols].rename(columns=dict(zip(keep_cols, new_cols)))
+     
 
 def city_airport_distance(cities_df : DataFrame, airports_df : DataFrame) -> DataFrame:
     install_pip_pkg({'geopy'})
