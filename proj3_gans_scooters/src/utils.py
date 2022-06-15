@@ -113,7 +113,7 @@ class MyMySQLConnection:
         # setup SQLAlchemy   
         from sqlalchemy import create_engine 
         if driver == 'pymysql': install_pip_pkg({'pymysql'})
-        cnx = f'{dialect}+{driver}://{user}:{password}@{host}:{port}/' #{db_name}'
+        cnx = f'{dialect}+{driver}://{user}:{password}@{host}:{port}/' #{__db_name}'
         self.alch_engine = create_engine(
             cnx, 
             connect_args={'connect_timeout': 10}, 
@@ -172,7 +172,6 @@ class MyMySQLConnection:
             insert_mode = 'append'
 
         df.to_sql(
-            #schema="dbo"
             name= tablename,
             if_exists=insert_mode, #'replace'
             con=external_con, 
