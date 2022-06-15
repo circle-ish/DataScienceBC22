@@ -2,9 +2,11 @@ from pandas import DataFrame
 import pandas as pd     
 import sys, os
 
-sys.path.append(os.path.join(os.path.dirname(''), '../..'))
-from proj3_gans_scooters.src.utils import install_pip_pkg
+from src.utils import install_pip_pkg
 
+def test():
+    print(2)
+    
 ### CITY 
 def scrape_wiki_cities() -> DataFrame:
     from bs4 import BeautifulSoup
