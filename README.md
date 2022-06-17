@@ -24,6 +24,7 @@ On each project I worked with a number of fellow students from the same DataScie
 [//]: # (* Machine Learning)
 [//]: # (* Predictive Modeling)
 * Data Visualization
+* ETL
 
 
 ### Technologies
@@ -31,7 +32,9 @@ On each project I worked with a number of fellow students from the same DataScie
 * Python
 * jupyter
 * Pandas, Seaborn
-* HTML
+* HTML, Requests
+* AWS RDS, AWS Lambda
+* Technical Documentation
 
 [//]: # (## Project Description)
 [//]: # (Provide more detailed overview of the project.  Talk a bit about your data sources and what questions and hypothesis you are)
