@@ -279,4 +279,3 @@ class MyMySQLConnection:
             # send data to sql
             self.add_table_to_db(new_df, tablename, insert_mode, con)
 
->>>>>>> e4fb90bfa05f9ba33e5df409c9cfecacc5feb64c
