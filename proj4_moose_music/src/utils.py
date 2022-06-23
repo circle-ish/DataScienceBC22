@@ -36,7 +36,7 @@ def install_pip_pkg(required : AbstractSet) -> None:
                 f'stderr : {output.stderr.decode("utf-8")}']))
             raise subprocess.CalledProcessError(e)
 
-        #load new modules into current pkg_resources.working_set
+        #load new modules into current pkg_resources.working_set 
         import imp
         imp.reload(pkg_resources)
 
@@ -254,3 +254,4 @@ class MyMySQLConnection:
                         
             # send data to sql
             self.add_table_to_db(new_df, tablename, insert_mode, con)
+
