@@ -44,7 +44,7 @@ def install_pip_pkg(required : AbstractSet) -> None:
         imp.reload(pkg_resources)
 
 def reload_module(args : Mapping[Text, Text]) -> None :
-    # i.e. name='.scraping', package='src'
+    # i.e. {'name' :'.visualisations', 'package':'src'}
     # partial imports a la : from ... import ... are implicitely repeated
     from importlib import import_module, reload
     module = import_module(**args)
