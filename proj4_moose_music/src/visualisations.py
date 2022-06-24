@@ -45,7 +45,7 @@ def spider_plot(df_clusters):
     g.map(plt_plot, 'theta', 'data', linewidth=1, linestyle=None)
     
     # customise each plot
-    for i, ax in enumerate(g._axes[0]):
+    for i, ax in enumerate(g.axes.flat):
         
         # rotate by 90° counterclockwise
         ax.set_theta_offset(pi / 2)
@@ -59,3 +59,31 @@ def spider_plot(df_clusters):
         mask = df_polar_melted['clusters'] == i
         colour = ax.get_lines()[0].get_color()
         ax.fill(angles[:N+1], df_polar_melted.loc[mask, 'data'], color = colour, alpha=0.1)
+        
+        
+        
+# show correlations of songs of a cluster in a heatmap
+# pass all songs with a numerical column 'clusters'
+def corr_heatmap(df):
+    from seaborn import heatmap as sns_heatmap
+    from seaborn import FacetGrid as sns_FacetGrid
+    from pandas import concat as pd_concat
+    
+    num_clusters = max(df['clusters'])
+    list_of_df = []
+    for i in range(num_clusters + 1):
+        tmp_df = df[df['clusters'] == i].drop(columns='clusters').corr()
+        list_of_df.append(tmp_df)
+    df_corr = pd_concat(list_of_df)
+    df_corr = df_corr.assign(clusters = sorted(df_corr.shape[1] * list(range(num_clusters + 1))))
+    
+    def draw_heatmap(*args, **kwargs):
+        data = kwargs.pop('data')
+        sns_heatmap(data, vmin = -1, vmax = 1, cmap = "PiYG", square=True, annot= True)
+        
+    g = sns_FacetGrid(data = df_corr, col='clusters', height=7)#, aspect=1.5)
+    g.map_dataframe(draw_heatmap,)
+
+    for ax in g.axes.flat:
+        # set aspect of all axis
+        ax.set_aspect('equal','box')
