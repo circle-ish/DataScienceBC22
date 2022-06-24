@@ -58,9 +58,7 @@ def spider_plot(df_clusters):
         # fill in the area
         mask = df_polar_melted['clusters'] == i
         colour = ax.get_lines()[0].get_color()
-        ax.fill(angles[:N+1], df_polar_melted.loc[mask, 'data'], color = colour, alpha=0.1)
-        
-        
+        ax.fill(angles[:N+1], df_polar_melted.loc[mask, 'data'], color = colour, alpha=0.1)     
         
 # show correlations of songs of a cluster in a heatmap
 # pass all songs with a numerical column 'clusters'
@@ -87,3 +85,9 @@ def corr_heatmap(df):
     for ax in g.axes.flat:
         # set aspect of all axis
         ax.set_aspect('equal','box')
+        
+    # calculate sums
+    cols = df_corr.columns[~df_corr.columns.isin(['clusters', 'sum'])]
+    df_corr['sum'] = df_corr.loc[:, cols].sum(axis=1)
+
+    return df_corr

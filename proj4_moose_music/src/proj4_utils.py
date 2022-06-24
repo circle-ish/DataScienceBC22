@@ -25,7 +25,7 @@ def test_num_data_scale(df_num : pd_DataFrame, scale_dict : Mapping) -> None:
     from src.utils import intersect_cols
     cols, _, remaining_df = intersect_cols(_df_scale.columns, _df_num_minmax.columns, return_all = 'yes')
     if remaining_df:
-        print(f'Columns {remaining_df} not found in passed df_num.')
+        print(f'test_num_data_scale: Columns {remaining_df} not found in passed df_num.')
 
     if _df_scale[cols].shape[1] != _df_num_minmax[cols].shape[1]:
             raise RuntimeError('test_num_data_scale: DataFrames do not have the same length')
