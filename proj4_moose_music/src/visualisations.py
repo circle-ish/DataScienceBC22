@@ -67,13 +67,13 @@ def corr_heatmap(df):
     from seaborn import FacetGrid as sns_FacetGrid
     from pandas import concat as pd_concat
     
-    num_clusters = max(df['clusters'])
+    num_clusters = max(df['clusters']) + 1
     list_of_df = []
-    for i in range(num_clusters + 1):
+    for i in range(num_clusters ):
         tmp_df = df[df['clusters'] == i].drop(columns='clusters').corr()
         list_of_df.append(tmp_df)
     df_corr = pd_concat(list_of_df)
-    df_corr = df_corr.assign(clusters = sorted(df_corr.shape[1] * list(range(num_clusters + 1))))
+    df_corr = df_corr.assign(clusters = sorted(df_corr.shape[1] * list(range(num_clusters))))
     
     def draw_heatmap(*args, **kwargs):
         data = kwargs.pop('data')
