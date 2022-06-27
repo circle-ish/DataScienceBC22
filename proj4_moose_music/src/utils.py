@@ -58,7 +58,7 @@ def reload_module(args : Mapping[Text, Text]) -> None :
 def load_csv_or_execute(
         __relative_path : Text, 
         __func : Callable[..., DataFrame], 
-        args :  Mapping = dict(), 
+        kwargs :  Mapping = dict(), 
         overwrite : Yes_No_Literal = 'no'
 ) -> DataFrame:
 
@@ -69,7 +69,7 @@ def load_csv_or_execute(
     if overwrite == 'no' and os.path.isfile(__relative_path):
         df = pd_read_csv(__relative_path, index_col=0)
     else:
-        df = __func(**args)
+        df = __func(**kwargs)
         df.to_csv(__relative_path)
     return df
         
