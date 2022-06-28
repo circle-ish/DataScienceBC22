@@ -5,6 +5,7 @@ This collection of projects is a part of the [Data Science Bootcamp by WBS Codin
 The purpose of these projects are to acquaint myself with the techniques and tools of a data scientist. 
 * proj2: exploring the influence of price discounts for the fictional eCommerce retailer Eniac 
 * proj3: using web scraping and open APIs to gather data for informed decisions to optimise business decisions for the fictional scooter operator Gans 
+* proj4: clustering songs into coherent playlists using KMeans for the fictional recommendation platform Moose
 
 ### Collaborations
 On each project I worked with a number of fellow students from the same DataScience Bootcamp batch:
@@ -18,6 +19,9 @@ On each project I worked with a number of fellow students from the same DataScie
 |proj3  |[@ATC-mmueller](https://github.com/ATC-mmueller)|
 |       |[WeiLing Peng](https://github.com/Weilingp) |
 |       |[Tamuka](https://github.com/TamuNongera02)|
+|proj4  |[@JLMA](https://github.com/JLMA-Pro-Trading)|
+|       |[Tamuka](https://github.com/TamuNongera02)|
+|       | ....and others  |
 
 ### Methods Used
 [//]: # (Inferential Statistics)
@@ -35,6 +39,7 @@ On each project I worked with a number of fellow students from the same DataScie
 * HTML, Requests
 * AWS RDS, AWS Lambda
 * Technical Documentation
+* KMeans
 
 [//]: # (## Project Description)
 [//]: # (Provide more detailed overview of the project.  Talk a bit about your data sources and what questions and hypothesis you are)
@@ -47,9 +52,20 @@ On each project I worked with a number of fellow students from the same DataScie
 2. Each project contains a main.ipynb that guides through the process.
 
 ## Featured Data and Deliverables
+
+|Project  |Name     |
+|---------|---------|
+|proj2  |Google Slides ["An investigation into Eniac’s discount strategy"](https://docs.google.com/presentation/d/1h76Fz6eDDT8DPktf8YEF953KTxp-ny33GF0PS2D31e4/edit#slide=id.p) |
+|       |the data used for Eniac comes from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)|
+|proj3  |requires API keys from from [openweather](https://openweathermap.org/) and [rapidAPI/aerodatabox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox)|
+|proj4  |[@JLMA](https://github.com/JLMA-Pro-Trading)|
+|       |[Tamuka](https://github.com/TamuNongera02)|
+|       | ....and others  |
+
 * proj2: Google Slides ["An investigation into Eniac’s discount strategy"](https://docs.google.com/presentation/d/1h76Fz6eDDT8DPktf8YEF953KTxp-ny33GF0PS2D31e4/edit#slide=id.p)
 * proj2: the data used for Eniac comes from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 * proj3: requires API keys from from [openweather](https://openweathermap.org/) and [rapidAPI/aerodatabox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox)
+* proj4: 
 
 ## Contributing WBS CS Members
 
